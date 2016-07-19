@@ -2,18 +2,15 @@ from pprint import PrettyPrinter
 
 from jedi import Script
 from jedi.evaluate.imports import Importer
-from pudb import set_trace
+
+# from pudb import set_trace
 
 pp = PrettyPrinter(indent=3)
 
 source = ''''''
-set_trace()
+# set_trace()
 script = Script(source, 1, 0, 'example.py')
 
 i = Importer(script._evaluator, [], script._get_module(), 0)
 vals = i.completion_names(script._evaluator, only_modules=True)
-pp.pprint(len(vals))
-
-completions = script.completions()
-print(completions[0].complete)
-print(completions[0].name)
+pp.pprint(vals)
