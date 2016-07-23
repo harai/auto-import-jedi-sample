@@ -14,14 +14,13 @@ source = ''''''
 set_trace()
 script = Script(source, 1, 0, 'example.py')
 completion = Completion(
-    script._evaluator, script._get_module(), script._code_lines,
-    script._pos, script.call_signatures
+    script._evaluator, script._get_module(), script._code_lines, script._pos,
+    script.call_signatures
 )
 i = Importer(
-    script._evaluator,
-    [FakeName('datetime', script._get_module())],
-    script._get_module(),
-    0)
+    script._evaluator, [FakeName('datetime', script._get_module())],
+    script._get_module(), 0
+)
 scope_set = i.follow()
 
 completion_names = []
@@ -31,6 +30,7 @@ for s in scope_set:
     names += chain.from_iterable(names_dict.values())
 
   completion_names += finder.filter_definition_names(
-      names, script._get_module())
+      names, script._get_module()
+  )
 
 pp.pprint(completion_names)
