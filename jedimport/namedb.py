@@ -1,43 +1,38 @@
 import abc
+import collections
 import logging
 from abc import ABCMeta
 from pprint import PrettyPrinter
 
-import msgpack
-
-from marisa_trie import BytesTrie
+from marisa_trie import Trie
 
 log = logging.getLogger(__name__)
 pp = PrettyPrinter(indent=3)
 
 
-def packb_gen(pair_gen):
-  for k, v in pair_gen:
-    pp.pprint(k)
-    pp.pprint(v)
-    yield k, msgpack.packb(v)
-
-
-def unpackb(val):
-  return msgpack.unpackb(val)
-
-
 class NameDB(metaclass=ABCMeta):
+
   @abc.abstractmethod
   def find_by_prefix(self, str):
     return
 
 
 class TrieNameDB(NameDB):
+
   def __init__(self, pair_gen):
-    self._data = BytesTrie(packb_gen(pair_gen))
+    self._dic = self._construct_dic(pair_gen)
+    self._index = Trie(self._dic.keys())
+
+  def _construct_dic(self, pair_gen):
+    dic = collections.defaultdict(list)
+    for k, v in pair_gen:
+      dic[k.lower()].append(v)
+    return dic
 
   def find_by_prefix(self, str, limit=10):
     result = []
-    count = 0
-    for k, v in self._data.itemsiter(str):
-      result.append((k, unpackb(v)))
-      count += 1
-      if count == limit:
+    for key in self._index.iterkeys(str):
+      result.extend(self._dic[key])
+      if limit <= len(result):
         break
     return result
