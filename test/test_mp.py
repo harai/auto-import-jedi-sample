@@ -2,13 +2,13 @@ import logging
 from pprint import PrettyPrinter
 from unittest import TestCase
 
-from jedimport.mp import ImportsIndexer
+from jedimport.namedb import TrieNameDB
 
 log = logging.getLogger(__name__)
 pp = PrettyPrinter(indent=3)
 
 
-class ImportsIndexerTest(TestCase):
+class TrieNameDBTest(TestCase):
 
   def test_find_by_prefix(self):
     data = [
@@ -19,12 +19,7 @@ class ImportsIndexerTest(TestCase):
         ('foobaz', 'FOOBAZ'),
         ('f', 'F'),
     ]
+    db = TrieNameDB(data)
 
-    indexer = ImportsIndexer()
-    indexer.start(data)
-
-    try:
-      self.assertEqual(
-          set(['FOO', 'FOOBAZ', 'FOOFOO']), set(indexer.find('foo')))
-    finally:
-      indexer.join()
+    self.assertEqual(
+        set(['FOO', 'FOOBAZ', 'FOOFOO']), set(db.find_by_prefix('foo')))
