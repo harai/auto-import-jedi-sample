@@ -4,8 +4,9 @@ import subprocess
 import sys
 from pprint import PrettyPrinter
 
+import autopep8
 from isort import SortImports
-from yapf.yapflib.yapf_api import FormatFile
+from yapf.yapflib.yapf_api import FormatCode
 
 log = logging.getLogger(__name__)
 pp = PrettyPrinter(indent=3)
@@ -32,11 +33,6 @@ def updated_paths():
       print(line)
 
 
-def beautify_with_yapf(path):
-  _, _, changed = FormatFile(path, in_place=True, style_config='setup.cfg')
-  return changed
-
-
 def get_file_contents(path):
   with open(path, 'r', encoding='utf8') as f:
     return f.read()
@@ -47,9 +43,17 @@ def put_file_contents(path, contents):
     f.write(contents)
 
 
-def beautify_with_isort(path):
+def beautify_with_autopep8_yapf_isort(path):
   contents = get_file_contents(path)
-  isorted_contents = SortImports(file_contents=contents).output
+
+  autopep8ed_contents = autopep8.fix_code(contents, apply_config=True)
+  try:
+    yapfed_contents, _ = FormatCode(
+        autopep8ed_contents, filename=path, style_config='setup.cfg')
+  except SyntaxError as e:
+    print(e)
+    return False
+  isorted_contents = SortImports(file_contents=yapfed_contents).output
 
   if contents == isorted_contents:
     return False
@@ -59,10 +63,6 @@ def beautify_with_isort(path):
 
 for path in updated_paths():
   if is_python(path):
-    changed = beautify_with_yapf(path)
-    if changed:
-      continue
-    changed = beautify_with_isort(path)
-    if changed:
+    if beautify_with_autopep8_yapf_isort(path):
       continue
     subprocess.call(['python', '-m', 'unittest'])

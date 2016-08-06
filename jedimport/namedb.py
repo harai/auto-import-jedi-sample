@@ -26,13 +26,13 @@ class TrieNameDB(NameDB):
   def _construct_dic(self, pair_gen):
     dic = collections.defaultdict(list)
     for k, v in pair_gen:
-      dic[k.lower()].append(v)
+      dic[k.lower()].append((k, v))
     return dic
 
-  def find_by_prefix(self, str, limit=10):
+  def find_by_prefix(self, str, limit=50):
     result = []
-    for key in self._index.iterkeys(str):
+    for key in self._index.iterkeys(str.lower()):
       result.extend(self._dic[key])
       if limit <= len(result):
         break
-    return result
+    return result[:limit]
