@@ -17,7 +17,8 @@ pp = PrettyPrinter(indent=3)
 def _all_names():
   mods = sum((p.full_modules() for p in packages.deep_scan()), [])
   mp_ctx = multiprocessing.get_context('spawn')
-  with ThreadPoolExecutor(max_workers=4) as executor:
+  cpu_count = multiprocessing.cpu_count()
+  with ThreadPoolExecutor(max_workers=cpu_count) as executor:
     futs = [
         executor.submit(util.isolated(modules.scan, chunk, mp_ctx))
         for chunk in util.chunks(mods, 50)

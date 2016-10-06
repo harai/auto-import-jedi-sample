@@ -100,7 +100,8 @@ def deep_scan():
 
   def _do():
     mp_ctx = multiprocessing.get_context('spawn')
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    cpu_count = multiprocessing.cpu_count()
+    with ThreadPoolExecutor(max_workers=cpu_count) as executor:
       yield from yield_pkgs(
           executor, submit_pkgs(executor, [Package.root_package()], mp_ctx),
           mp_ctx)
